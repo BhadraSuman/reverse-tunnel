@@ -58,6 +58,30 @@ Run these inside `~/reverse-tunnel`:
 | `docker compose logs -f --tail=50` | Tail live logs for all services |
 | `docker compose logs server --tail=20` | Server logs only |
 | `docker compose restart` | Restart all services |
-| `docker compose up -d --build` | Rebuild and deploy local changes |
-| `git pull && docker compose up -d --build` | Deploy updates from GitHub |
 | `docker compose down` | Stop everything |
+
+## 6. How to Deploy Updates
+
+When you make changes to the code (like a UI update to the dashboard), you can deploy them to production with zero downtime for your other services.
+
+**Step 1: Pull the latest code on the VM**
+```bash
+cd ~/reverse-tunnel
+git pull
+```
+
+**Step 2: Rebuild and restart the specific service**
+By specifying the service name, Docker will only rebuild that specific container, leaving your active tunnels uninterrupted.
+
+```bash
+# To update ONLY the Next.js dashboard
+docker compose up -d --build dashboard
+
+# To update ONLY the Go server
+docker compose up -d --build server
+```
+
+If you want to rebuild and update the entire stack at once:
+```bash
+docker compose up -d --build
+```

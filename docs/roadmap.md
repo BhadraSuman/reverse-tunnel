@@ -81,6 +81,13 @@ This document outlines the strategic vision and feature roadmap for **Reverse Tu
 * **What it does:** Extends Reverse Tunnel beyond web servers to support databases (PostgreSQL, MySQL, Redis), SSH sessions, and gRPC services.
 * **Engineering Challenge:** Requires extending the multiplexing layer from frame-based HTTP chunks to persistent, bidirectional byte-stream multiplexing.
 
+### 10. Instant Static Site & HTML Hosting (`tunnel deploy`)
+* **What it is:** A zero-configuration static asset deployment tool built into both the CLI and Dashboard.
+* **What it does:** Allows developers to publish an `index.html` file or build output directory (`dist/`) using `tunnel deploy ./dist` or drag-and-drop in the Dashboard. Generates a live URL (e.g. `swift-falcon-88.quickshelf.online`) that remains online even when the local laptop is powered off.
+* **Engineering & Architecture:**
+  * **Dual-Mode Proxy Routing:** The Go proxy checks subdomain entries in MongoDB. If flagged `isStatic: true`, requests bypass the WebSocket tunnel channel and are served directly from disk via `http.FileServer`.
+  * **Abuse & Quota Control:** Enforces per-user storage quotas (e.g., 20 MB per deployment) and requires authenticated sessions to prevent phishing abuse.
+
 ---
 
 ## 📊 Summary Roadmap Matrix
@@ -92,4 +99,5 @@ This document outlines the strategic vision and feature roadmap for **Reverse Tu
 | **v0.3** | Fault Injection Middleware | Chaos engineering latency & error injection |
 | **v0.3** | MCP Server Integration | Protocol implementation for Cursor & Claude Code |
 | **v0.4** | AI Triage & PII Detector | Structured JSON output + Two-stage entropy/LLM filter |
+| **v0.4** | Instant Static Site Hosting | Dual-mode Go proxy routing (`isStatic`) & disk file serving |
 | **v0.5** | Raw TCP Tunneling | Bidirectional byte-stream multiplexing |

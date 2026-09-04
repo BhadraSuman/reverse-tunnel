@@ -1,0 +1,57 @@
+# Air configuration for Reverse Tunnel CLI development
+# Use this config when developing the tunnel client: air -c .air.tunnel.toml
+
+root = "."
+test_dir = ""
+
+[build]
+  # Build the tunnel CLI instead of the server
+  cmd = "go build -o ./bin/tunnel.exe ./cmd/tunnel"
+  bin = "bin/tunnel.exe"
+  
+  # Watch these filename extensions.
+  include_ext = ["go", "tpl", "tmpl", "html", "env"]
+  
+  # Ignore these filename extensions or directories.
+  exclude_dir = ["bin", "dist", "vendor", "node_modules", ".git", ".idea", ".vscode", "dashboard"]
+  
+  # Watch these directories - focus on CLI-related code
+  include_dir = ["cmd/tunnel", "cli", "internal"]
+  
+  # Exclude test files and server-specific code
+  exclude_regex = ["_test\\.go", "cmd/server"]
+  
+  exclude_unchanged = false
+  follow_symlink = false
+  log = "tunnel-errors.log"
+  poll = false
+  poll_interval = 500
+  delay = 0
+  stop_on_error = false
+  send_interrupt = false
+  kill_delay = "0s"
+  rerun = false  # Don't auto-run tunnel CLI (it needs arguments)
+  rerun_delay = 500
+  
+  # CLI arguments - customize these for your local testing
+  # Example: connect to local server and forward port 3000
+  args_bin = ["start", "--port", "3000", "--server", "ws://localhost:3001"]
+  
+  [build.env]
+    CGO_ENABLED = "0"
+    GOOS = ""
+    GOARCH = ""
+
+[color]
+  main = "blue"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "green"
+
+[log]
+  time = false
+  main_only = false
+
+[misc]
+  clean_on_exit = false
+  reload_browser = false

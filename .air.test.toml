@@ -1,0 +1,53 @@
+# Air configuration for continuous testing during development
+# Use this config to auto-run tests on file changes: air -c .air.test.toml
+
+root = "."
+test_dir = ""
+
+[build]
+  # Run tests instead of building binaries
+  cmd = "go test ./... -cover -short"
+  bin = ""  # No binary output for tests
+  
+  # Watch these filename extensions.
+  include_ext = ["go"]
+  
+  # Ignore these directories.
+  exclude_dir = ["bin", "dist", "vendor", "node_modules", ".git", ".idea", ".vscode", "dashboard"]
+  
+  # Watch these directories
+  include_dir = ["cmd", "internal", "cli"]
+  
+  # Include test files this time
+  exclude_regex = []
+  
+  exclude_unchanged = false
+  follow_symlink = false
+  log = "test-errors.log"
+  poll = false
+  poll_interval = 500
+  delay = 1000  # Slightly longer delay for tests to avoid too frequent runs
+  stop_on_error = false
+  send_interrupt = false
+  kill_delay = "0s"
+  rerun = false  # Don't rerun tests, just build (run) them once per change
+  rerun_delay = 500
+  args_bin = []
+  
+  [build.env]
+    CGO_ENABLED = "0"
+    GO_ENV = "test"
+
+[color]
+  main = "green"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "white"
+
+[log]
+  time = true  # Show timestamps for test runs
+  main_only = false
+
+[misc]
+  clean_on_exit = true
+  reload_browser = false

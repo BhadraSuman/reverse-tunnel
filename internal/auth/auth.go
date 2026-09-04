@@ -1,4 +1,4 @@
-// Package auth handles API key validation against MongoDB.
+// Package auth handles API key validation using repository abstraction.
 // It hashes incoming keys with SHA-256 and compares against stored hashes —
 // so raw API keys are never stored in the database.
 package auth
@@ -12,8 +12,7 @@ import (
 	"time"
 
 	"github.com/bhadrasuman/reverse-tunnel/internal/models"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/bhadrasuman/reverse-tunnel/internal/repository"
 )
 
 // ErrInvalidKey is a sentinel error for authentication failures.
@@ -21,18 +20,18 @@ import (
 // with errors.Is() — similar to creating a named error class in TypeScript.
 var ErrInvalidKey = errors.New("invalid or missing API key")
 
-// Authenticator holds a reference to the MongoDB users collection.
-// This is Go's equivalent of a class with a constructor-injected dependency.
+// Authenticator handles API key validation using a repository interface.
+// This allows for dependency injection and makes unit testing possible with mocks.
 type Authenticator struct {
-	collection *mongo.Collection
+	userRepo repository.UserRepository
 }
 
-// New constructs an Authenticator with the given MongoDB database.
-// We accept *mongo.Database and extract the collection here, so callers
-// only need to pass the database — not the specific collection name.
-func New(db *mongo.Database) *Authenticator {
+// New constructs an Authenticator with the given UserRepository.
+// This enables dependency injection — callers can pass either a real MongoDB
+// repository or a mock repository for testing.
+func New(userRepo repository.UserRepository) *Authenticator {
 	return &Authenticator{
-		collection: db.Collection("users"),
+		userRepo: userRepo,
 	}
 }
 
@@ -47,13 +46,13 @@ func HashKey(key string) string {
 	return fmt.Sprintf("%x", sum)
 }
 
-// ValidateKey checks a raw API key against the database.
+// ValidateKey checks a raw API key against the repository.
 // It returns the matching User or ErrInvalidKey.
 //
 // Flow:
 //  1. Strip the "Bearer " prefix if present (so both "Bearer rt_abc" and "rt_abc" work).
 //  2. Hash the key.
-//  3. Query MongoDB for a user with that hash.
+//  3. Query repository for a user with that hash.
 //  4. Return ErrInvalidKey if not found.
 func (a *Authenticator) ValidateKey(rawKey string) (*models.User, error) {
 	// strings.TrimPrefix returns the string with the prefix removed,
@@ -67,26 +66,20 @@ func (a *Authenticator) ValidateKey(rawKey string) (*models.User, error) {
 
 	hash := HashKey(key)
 
-	// Use a context with timeout so a slow/unreachable DB doesn't block
+	// Use a context with timeout so a slow/unreachable repository doesn't block
 	// the HTTP handler goroutine indefinitely.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// bson.M is a map type used to build MongoDB query filters.
-	// Equivalent to: db.users.findOne({ apiKeyHash: hash })
-	var user models.User
-	err := a.collection.FindOne(ctx, bson.M{"apiKeyHash": hash}).Decode(&user)
+	user, err := a.userRepo.FindByKeyHash(ctx, hash)
 	if err != nil {
-		// mongo.ErrNoDocuments is the sentinel error for "not found".
-		// errors.Is() unwraps error chains — always prefer it over == comparison.
-		if errors.Is(err, mongo.ErrNoDocuments) {
+		// repository.ErrUserNotFound maps to our auth-level ErrInvalidKey
+		if errors.Is(err, repository.ErrUserNotFound) {
 			return nil, ErrInvalidKey
 		}
 		// For other errors (network issues, etc.), wrap and return them.
-		// fmt.Errorf with %w creates an error that wraps the original,
-		// preserving it for errors.Is / errors.As unwrapping by callers.
-		return nil, fmt.Errorf("db lookup failed: %w", err)
+		return nil, fmt.Errorf("user lookup failed: %w", err)
 	}
 
-	return &user, nil
+	return user, nil
 }

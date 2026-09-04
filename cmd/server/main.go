@@ -19,6 +19,7 @@ import (
 	"github.com/bhadrasuman/reverse-tunnel/internal/db"
 	"github.com/bhadrasuman/reverse-tunnel/internal/proxy"
 	"github.com/bhadrasuman/reverse-tunnel/internal/registry"
+	"github.com/bhadrasuman/reverse-tunnel/internal/repository"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
@@ -50,10 +51,17 @@ func main() {
 		logger.Fatal("failed to connect to MongoDB", zap.Error(err))
 	}
 	logger.Info("connected to MongoDB")
+	logger.Info("hot reload test - server dependencies ready")
 
 	// --- Set up dependencies ---
 	mongoDatabase := mongoClient.Database("tunnel")
-	authenticator := auth.New(mongoDatabase)
+	
+	// Create repository layer with dependency injection
+	userRepo := repository.NewMongoUserRepository(mongoDatabase.Collection("users"))
+	
+	// Create authenticator with injected repository
+	authenticator := auth.New(userRepo)
+	
 	reg := registry.New()
 
 	// Read domain from env, default to a placeholder for local dev.

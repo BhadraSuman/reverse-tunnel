@@ -1,8 +1,17 @@
 .env
+.env.test.local
 bin/
 dist/
 *.exe
 *.test
+coverage.out
+coverage.html
+
+# Air hot reload
+errors.log
+tunnel-errors.log
+test-errors.log
+tmp/
 
 # Go
 vendor/

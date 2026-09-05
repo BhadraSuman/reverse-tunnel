@@ -58,6 +58,10 @@ func main() {
 	
 	// Create repository layer with dependency injection
 	userRepo := repository.NewMongoUserRepository(mongoDatabase.Collection("users"))
+	logRepo, err := repository.NewMongoRequestLogRepository(mongoDatabase)
+	if err != nil {
+		logger.Error("failed to initialize request log repository", zap.Error(err))
+	}
 	
 	// Create authenticator with injected repository
 	authenticator := auth.New(userRepo)
@@ -72,7 +76,7 @@ func main() {
 
 	// Create the two servers. They share the same registry.
 	controlServer := control.New(reg, authenticator, domain, logger)
-	proxyServer := proxy.New(reg, domain, logger)
+	proxyServer := proxy.New(reg, domain, logger, proxy.WithRequestLogRepository(logRepo))
 
 	// --- Read ports from env with defaults ---
 	portControl := envOrDefault("PORT_CONTROL", "3001")
@@ -97,6 +101,53 @@ func main() {
 		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte("ok"))
+		})
+
+		// GET /api/inspect/logs — returns recent traffic logs for a subdomain.
+		mux.HandleFunc("/api/inspect/logs", func(w http.ResponseWriter, r *http.Request) {
+			subdomain := r.URL.Query().Get("subdomain")
+			if subdomain == "" {
+				http.Error(w, `{"error":"subdomain query parameter required"}`, http.StatusBadRequest)
+				return
+			}
+
+			if logRepo == nil {
+				http.Error(w, `{"error":"traffic inspector disabled"}`, http.StatusServiceUnavailable)
+				return
+			}
+
+			logs, err := logRepo.GetLogsBySubdomain(r.Context(), subdomain, 50)
+			if err != nil {
+				logger.Error("failed to fetch traffic logs", zap.Error(err))
+				http.Error(w, `{"error":"failed to fetch logs"}`, http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(logs)
+		})
+
+		// GET /api/inspect/log — returns a single traffic log by ID.
+		mux.HandleFunc("/api/inspect/log", func(w http.ResponseWriter, r *http.Request) {
+			id := r.URL.Query().Get("id")
+			if id == "" {
+				http.Error(w, `{"error":"id query parameter required"}`, http.StatusBadRequest)
+				return
+			}
+
+			if logRepo == nil {
+				http.Error(w, `{"error":"traffic inspector disabled"}`, http.StatusServiceUnavailable)
+				return
+			}
+
+			logEntry, err := logRepo.GetLogByID(r.Context(), id)
+			if err != nil {
+				http.Error(w, `{"error":"log not found"}`, http.StatusNotFound)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(logEntry)
 		})
 
 		// GET /api/tunnels — returns JSON list of active tunnels for the dashboard.

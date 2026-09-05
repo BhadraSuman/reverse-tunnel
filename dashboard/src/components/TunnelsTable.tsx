@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Terminal, ExternalLink, Wifi } from 'lucide-react'
+import TrafficInspector from './TrafficInspector'
 
 interface Tunnel {
   subdomain: string
@@ -136,6 +137,13 @@ export default function TunnelsTable({ userId }: TunnelsTableProps) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Traffic Inspector for Active Tunnels */}
+      {!loading && !error && tunnels.length > 0 && (
+        <div className="mt-6 pt-6 border-t border-gray-800">
+          <TrafficInspector subdomain={tunnels[0].subdomain} />
         </div>
       )}
     </section>

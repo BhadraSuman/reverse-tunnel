@@ -5,6 +5,7 @@
 package proxy
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -13,8 +14,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bhadrasuman/reverse-tunnel/internal/models"
 	"github.com/bhadrasuman/reverse-tunnel/internal/protocol"
 	"github.com/bhadrasuman/reverse-tunnel/internal/registry"
+	"github.com/bhadrasuman/reverse-tunnel/internal/repository"
 	"github.com/rs/xid"
 	"go.uber.org/zap"
 )
@@ -24,16 +27,31 @@ import (
 // own goroutine with its own local variables).
 type Server struct {
 	registry *registry.Registry
+	logRepo  repository.RequestLogRepository
 	domain   string
 	logger   *zap.Logger
 }
 
 // New constructs a proxy Server.
-func New(reg *registry.Registry, domain string, logger *zap.Logger) *Server {
-	return &Server{
+func New(reg *registry.Registry, domain string, logger *zap.Logger, opts ...Option) *Server {
+	srv := &Server{
 		registry: reg,
 		domain:   domain,
 		logger:   logger,
+	}
+	for _, opt := range opts {
+		opt(srv)
+	}
+	return srv
+}
+
+// Option defines functional options for proxy Server.
+type Option func(*Server)
+
+// WithRequestLogRepository sets the Traffic Inspector repository.
+func WithRequestLogRepository(repo repository.RequestLogRepository) Option {
+	return func(s *Server) {
+		s.logRepo = repo
 	}
 }
 
@@ -167,11 +185,15 @@ func (s *Server) Handler() http.HandlerFunc {
 			return
 		}
 
+		startTime := time.Now()
+
 		// --- Step 9: Wait for CLI response ---
 		// select is Go's multi-channel wait — similar to Promise.race().
 		// We wait for either the CLI response or a 30-second timeout.
 		select {
 		case resp := <-responseCh:
+			durationMs := time.Since(startTime).Milliseconds()
+
 			// Decode the base64-encoded response body from the CLI.
 			body, err := base64.StdEncoding.DecodeString(resp.Body)
 			if err != nil {
@@ -195,11 +217,41 @@ func (s *Server) Handler() http.HandlerFunc {
 			// Atomically increment the tunnel's request counter.
 			tunnel.ReqCount.Add(1)
 
+			// Asynchronously log to Traffic Inspector (MongoDB) if logRepo configured
+			if s.logRepo != nil {
+				reqBodyStr := string(bodyBytes)
+				respBodyStr := resp.Body // base64 encoded payload
+				userID := tunnel.UserID
+
+				go func() {
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer cancel()
+
+					_ = s.logRepo.CreateLog(ctx, &models.RequestLog{
+						ChannelID:       channelID,
+						Subdomain:       sub,
+						UserID:          userID,
+						Method:          r.Method,
+						Path:            r.URL.Path,
+						Query:           r.URL.RawQuery,
+						RequestHeaders:  flatHeaders,
+						RequestBody:     reqBodyStr,
+						ResponseStatus:  resp.Status,
+						ResponseHeaders: resp.Headers,
+						ResponseBody:    respBodyStr,
+						DurationMs:      durationMs,
+						ClientIP:        r.RemoteAddr,
+						CreatedAt:       startTime,
+					})
+				}()
+			}
+
 			s.logger.Info("proxied request",
 				zap.String("subdomain", sub),
 				zap.String("method", r.Method),
 				zap.String("path", path),
 				zap.Int("status", resp.Status),
+				zap.Int64("durationMs", durationMs),
 			)
 
 		case <-time.After(30 * time.Second):

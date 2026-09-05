@@ -100,7 +100,7 @@ export default async function HomePage() {
       </main>
 
       <footer className="border-t border-gray-800/50 py-6 text-center text-xs text-gray-600">
-        Tunnel &mdash; Open source reverse proxy
+        Tunnel &mdash; Open source reverse proxy | 2026
       </footer>
     </div>
   )

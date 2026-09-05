@@ -13,11 +13,16 @@ import (
 )
 
 func TestMongoRequestLogRepository(t *testing.T) {
-	ctx := context.Background()
-	mongoDB := testutil.SetupTestDB(t)
+	testutil.SkipIfMongoUnavailable(t)
 
-	logRepo, err := repository.NewMongoRequestLogRepository(mongoDB)
+	helper := testutil.NewMongoTestHelper(t, nil)
+	require.NotNil(t, helper)
+	defer helper.Cleanup(t)
+
+	logRepo, err := repository.NewMongoRequestLogRepository(helper.Database)
 	require.NoError(t, err)
+
+	ctx := context.Background()
 
 	t.Run("CreateLog and GetLogsBySubdomain", func(t *testing.T) {
 		logEntry := &models.RequestLog{

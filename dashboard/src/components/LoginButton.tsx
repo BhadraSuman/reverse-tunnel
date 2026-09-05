@@ -3,14 +3,22 @@
 import { signIn } from 'next-auth/react'
 import { Github } from 'lucide-react'
 
-export default function LoginButton() {
+interface LoginButtonProps {
+  className?: string
+  text?: string
+}
+
+export default function LoginButton({ className, text }: LoginButtonProps) {
   return (
     <button
       onClick={() => signIn('github')}
-      className="flex items-center gap-3 bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8 py-3 rounded-xl text-lg transition-all duration-150 shadow-lg hover:shadow-xl"
+      className={
+        className ||
+        'flex items-center justify-center gap-2.5 bg-violet-600 hover:bg-violet-500 text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-all shadow-lg hover:shadow-violet-600/30'
+      }
     >
-      <Github className="w-5 h-5" />
-      Continue with GitHub
+      <Github className="w-4 h-4" />
+      {text || 'Sign In with GitHub'}
     </button>
   )
 }

@@ -14,11 +14,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       const githubId = String(profile?.id || account.providerAccountId)
 
-      // Generate initial API key for new users only
-      const rawKey = 'tk_' + crypto.randomBytes(24).toString('hex')
-      const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex')
-      const keyPrefix = rawKey.slice(0, 11) // "tk_" + 8 chars
-
       await User.findOneAndUpdate(
         { githubId },
         {
@@ -27,8 +22,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: user.email || '',
             name: user.name || '',
             avatarUrl: user.image || '',
-            apiKeyHash: keyHash,
-            apiKeyPrefix: keyPrefix,
             maxTunnels: 3,
             createdAt: new Date(),
           },

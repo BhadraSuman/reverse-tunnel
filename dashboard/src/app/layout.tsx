@@ -6,8 +6,15 @@ import Providers from '@/components/Providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Tunnel',
-  description: 'Expose localhost to the internet',
+  title: 'Reverse Tunnel — Expose Localhost Instantly',
+  description: 'A minimalist, high-performance reverse proxy for developers. Debug webhooks in real-time, inspect payloads, and share live WIP links on your custom domain.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' }
+    ],
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Terminal, ExternalLink, Wifi } from 'lucide-react'
+import { Terminal, ExternalLink, Wifi, Copy, Check } from 'lucide-react'
 import TrafficInspector from './TrafficInspector'
 
 interface Tunnel {
@@ -27,6 +27,7 @@ export default function TunnelsTable({ userId }: TunnelsTableProps) {
   const [tunnels, setTunnels] = useState<Tunnel[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [copiedSubdomain, setCopiedSubdomain] = useState<string | null>(null)
 
   const [domain, setDomain] = useState<string>('quickshelf.online')
 
@@ -67,7 +68,7 @@ export default function TunnelsTable({ userId }: TunnelsTableProps) {
   }, [fetchTunnels])
 
   return (
-    <section className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-950/80 p-6 shadow-2xl backdrop-blur-xl hover:border-zinc-700/80 transition-all">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
@@ -131,15 +132,32 @@ export default function TunnelsTable({ userId }: TunnelsTableProps) {
                     </span>
                   </td>
                   <td className="px-6 py-3.5">
-                    <a
-                      href={`https://${tunnel.subdomain}.${domain}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-sm text-violet-400 hover:text-violet-300 transition-colors"
-                    >
-                      {tunnel.subdomain}.{domain}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`https://${tunnel.subdomain}.${domain}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-sm text-violet-400 hover:text-violet-300 font-mono transition-colors"
+                      >
+                        {tunnel.subdomain}.{domain}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <button
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(`https://${tunnel.subdomain}.${domain}`)
+                          setCopiedSubdomain(tunnel.subdomain)
+                          setTimeout(() => setCopiedSubdomain(null), 2000)
+                        }}
+                        title="Copy Tunnel URL"
+                        className="p-1 text-gray-500 hover:text-white bg-gray-900 hover:bg-gray-800 rounded transition-colors"
+                      >
+                        {copiedSubdomain === tunnel.subdomain ? (
+                          <Check className="w-3.5 h-3.5 text-green-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
                   </td>
                   <td className="px-6 py-3.5 text-sm text-gray-400">
                     {relativeTime(tunnel.connectedAt)}

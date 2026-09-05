@@ -24,7 +24,7 @@ const steps = [
 
 export default function QuickStart() {
   return (
-    <section className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-950/80 p-6 shadow-2xl backdrop-blur-xl hover:border-zinc-700/80 transition-all">
       <div className="flex items-center gap-2 mb-6">
         <Zap className="w-5 h-5 text-violet-400" />
         <h2 className="text-lg font-semibold text-white">Quick Start</h2>

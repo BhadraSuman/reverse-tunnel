@@ -28,7 +28,23 @@ export default function TunnelsTable({ userId }: TunnelsTableProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const domain = process.env.NEXT_PUBLIC_DOMAIN || 'tunnel.local'
+  const [domain, setDomain] = useState<string>('quickshelf.online')
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_DOMAIN) {
+      setDomain(process.env.NEXT_PUBLIC_DOMAIN)
+    } else if (typeof window !== 'undefined') {
+      const host = window.location.hostname
+      // If host is dashboard.quickshelf.online -> base is quickshelf.online
+      // If host is localhost -> base is localhost
+      if (host.includes('.')) {
+        const parts = host.split('.')
+        setDomain(parts.slice(1).join('.'))
+      } else {
+        setDomain('localhost')
+      }
+    }
+  }, [])
 
   const fetchTunnels = useCallback(async () => {
     try {

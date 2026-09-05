@@ -56,9 +56,12 @@ func (r *MongoRequestLogRepository) CreateLog(ctx context.Context, log *models.R
 		log.ExpiresAt = log.CreatedAt.Add(24 * time.Hour) // Auto-expire after 24 hours
 	}
 
-	_, err := r.collection.InsertOne(ctx, log)
+	res, err := r.collection.InsertOne(ctx, log)
 	if err != nil {
 		return fmt.Errorf("failed to insert request log: %w", err)
+	}
+	if oid, ok := res.InsertedID.(primitive.ObjectID); ok {
+		log.ID = oid
 	}
 	return nil
 }

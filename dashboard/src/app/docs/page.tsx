@@ -43,6 +43,7 @@ export default function DocsPage() {
     { id: 'security', label: 'Security & Data Privacy', icon: Shield },
     { id: 'troubleshooting', label: 'Troubleshooting & Fixes', icon: HelpCircle },
     { id: 'architecture', label: 'Architecture & Stack', icon: Layers },
+    { id: 'developer', label: 'Developer & Contributor Guide', icon: FileText },
   ]
 
   const filteredSections = sections.filter((s) =>
@@ -270,6 +271,57 @@ export default function DocsPage() {
               </div>
 
               <div className="space-y-4">
+                <h3 className="text-base font-bold text-white">CLI Commands</h3>
+                <div className="space-y-3 font-mono text-xs">
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-emerald-400 font-bold">tunnel update</span>
+                      <span className="text-zinc-500 text-[11px]">Auto-Update Check</span>
+                    </div>
+                    <p className="text-zinc-300 font-sans text-xs">
+                      Checks the official GitHub Releases API for newer CLI versions, displays release notes, and provides one-command upgrade instructions.
+                    </p>
+                    <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-emerald-400 flex items-center justify-between">
+                      <code>tunnel update</code>
+                      <button
+                        onClick={() => handleCopy('tunnel update', 'cli-update')}
+                        className="text-zinc-400 hover:text-white transition-colors"
+                      >
+                        {copiedCode === 'cli-update' ? (
+                          <Check className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-emerald-400 font-bold">tunnel version</span>
+                      <span className="text-zinc-500 text-[11px]">Build & Version Metadata</span>
+                    </div>
+                    <p className="text-zinc-300 font-sans text-xs">
+                      Prints the active CLI binary version, compile-time Git commit SHA, build timestamp, and OS/architecture target.
+                    </p>
+                    <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-emerald-400 flex items-center justify-between">
+                      <code>tunnel version</code>
+                      <button
+                        onClick={() => handleCopy('tunnel version', 'cli-ver')}
+                        className="text-zinc-400 hover:text-white transition-colors"
+                      >
+                        {copiedCode === 'cli-ver' ? (
+                          <Check className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
                 <h3 className="text-base font-bold text-white">CLI Flags</h3>
                 <div className="overflow-x-auto rounded-xl border border-zinc-800">
                   <table className="w-full text-left text-xs font-mono">
@@ -281,6 +333,11 @@ export default function DocsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800/60 bg-zinc-950">
+                      <tr>
+                        <td className="p-3 text-emerald-400 font-bold">--help, -h</td>
+                        <td className="p-3 text-zinc-500">Built-in</td>
+                        <td className="p-3 text-zinc-300">Displays help description and options for any command</td>
+                      </tr>
                       <tr>
                         <td className="p-3 text-emerald-400 font-bold">--port, -p</td>
                         <td className="p-3 text-zinc-500">3000</td>
@@ -449,6 +506,51 @@ export default function DocsPage() {
                   <div>External Visitor ──► Nginx (Port 443 SSL)</div>
                   <div className="text-violet-400">              └──► Go Proxy Server (Port 4000)</div>
                   <div className="text-emerald-400">                     └──► WebSocket Tunnel (WSS) ──► CLI (Your Laptop) ──► Localhost App</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 8: DEVELOPER & CONTRIBUTOR GUIDE */}
+          {activeSection === 'developer' && (
+            <div className="space-y-6">
+              <div>
+                <span className="text-xs font-mono text-violet-400 uppercase tracking-wider bg-violet-950/60 border border-violet-800/60 px-3 py-1 rounded-full">
+                  Contributing
+                </span>
+                <h1 className="text-3xl font-bold text-white tracking-tight mt-3">
+                  Developer & Contributor Guide
+                </h1>
+              </div>
+
+              <div className="space-y-4 font-sans text-xs">
+                <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 space-y-2">
+                  <h3 className="text-sm font-bold text-white font-mono">1. Local Setup Commands</h3>
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 font-mono text-xs text-emerald-400 space-y-1">
+                    <div># 1. Start MongoDB</div>
+                    <div>docker compose up -d mongo</div>
+                    <div className="pt-2"># 2. Run Go server</div>
+                    <div>make dev-server</div>
+                    <div className="pt-2"># 3. Run Next.js dashboard</div>
+                    <div>cd dashboard && npm run dev</div>
+                  </div>
+                </div>
+
+                <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 space-y-2">
+                  <h3 className="text-sm font-bold text-white font-mono">2. Running Unit & Integration Tests</h3>
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 font-mono text-xs text-emerald-400 space-y-1">
+                    <div># Run all Go package tests</div>
+                    <div>go test -v ./...</div>
+                    <div className="pt-2"># Run with race detector</div>
+                    <div>go test -race ./...</div>
+                  </div>
+                </div>
+
+                <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 space-y-2">
+                  <h3 className="text-sm font-bold text-white font-mono">3. Security Standards</h3>
+                  <p className="text-zinc-400 leading-relaxed">
+                    All new features must comply with Strict Account Namespace Isolation (<code className="text-violet-300 font-mono">&lt;username&gt;-&lt;name&gt;.quickshelf.online</code>), enforce system domain blacklists via <code className="text-violet-300 font-mono">subdomain.IsSystemReserved</code>, and maintain SHA-256 key digest storage.
+                  </p>
                 </div>
               </div>
             </div>

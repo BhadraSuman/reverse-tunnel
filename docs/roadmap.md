@@ -1,10 +1,10 @@
-# 🗺️ Roadmap & Future Architecture
+# Roadmap & Future Architecture
 
 This document outlines the strategic vision and feature roadmap for **Reverse Tunnel**. Unlike basic port-forwarding tools, Reverse Tunnel aims to provide a complete **Traffic Capture, Debugging, and AI-Powered Observability Platform** for developers.
 
 ---
 
-## 🎯 Phase 1: Core Capture & Debugging Engine (Foundational)
+## Phase 1: Core Capture & Debugging Engine (Foundational)
 
 ### 1. Traffic Inspector & One-Click Replay
 * **What it is:** A full-featured HTTP traffic capture and replay console embedded directly in the dashboard and CLI.
@@ -24,7 +24,7 @@ This document outlines the strategic vision and feature roadmap for **Reverse Tu
 
 ---
 
-## ⚡ Phase 2: Resilience & Network Control
+## Phase 2: Resilience & Network Control
 
 ### 3. Fault Injection Engine (Chaos Engineering)
 * **What it is:** Middleware inside the proxy server that allows developers to simulate adverse network conditions and server failures.
@@ -43,7 +43,7 @@ This document outlines the strategic vision and feature roadmap for **Reverse Tu
 
 ---
 
-## 🤖 Phase 3: AI & Agentic Workflow Integrations
+## Phase 3: AI & Agentic Workflow Integrations
 
 ### 5. Native Model Context Protocol (MCP) Server
 * **What it is:** An integrated MCP (Model Context Protocol) server exposed directly by the tunnel infrastructure.
@@ -70,7 +70,7 @@ This document outlines the strategic vision and feature roadmap for **Reverse Tu
 
 ---
 
-## 🚀 Phase 4: Platform & Protocol Extensions
+## Phase 4: Platform & Protocol Extensions
 
 ### 8. Semantic Traffic Search (Vector RAG on Real Data)
 * **What it is:** Vector-based natural language search over captured network traffic.
@@ -90,7 +90,7 @@ This document outlines the strategic vision and feature roadmap for **Reverse Tu
 
 ---
 
-## 📊 Summary Roadmap Matrix
+## Summary Roadmap Matrix
 
 | Milestone | Target Feature | Key Technical Highlight |
 |---|---|---|

@@ -6,7 +6,9 @@ package control
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -14,6 +16,7 @@ import (
 	"github.com/bhadrasuman/reverse-tunnel/internal/protocol"
 	"github.com/bhadrasuman/reverse-tunnel/internal/registry"
 	"github.com/bhadrasuman/reverse-tunnel/internal/subdomain"
+	"github.com/bhadrasuman/reverse-tunnel/internal/version"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
@@ -73,6 +76,36 @@ func (s *Server) Handler() http.HandlerFunc {
 				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "auth error"})
 			}
 			return
+		}
+
+		// --- Step 1b: Verify CLI version compatibility ---
+		cliVersion := r.URL.Query().Get("version")
+		if cliVersion == "" {
+			cliVersion = r.Header.Get("X-CLI-Version")
+		}
+		if cliVersion == "" {
+			cliVersion = version.Version
+		}
+
+		minVer := os.Getenv("MIN_CLI_VERSION")
+		if minVer == "" {
+			minVer = "v0.1.0"
+		}
+		latestVer := os.Getenv("LATEST_CLI_VERSION")
+		if latestVer == "" {
+			latestVer = version.Version
+		}
+
+		if version.IsBelowMinimum(cliVersion, minVer) {
+			writeJSON(w, http.StatusUpgradeRequired, map[string]string{
+				"error": fmt.Sprintf("CLI version %s is obsolete. Minimum required version is %s. Run 'tunnel update' to upgrade.", cliVersion, minVer),
+			})
+			return
+		}
+
+		var updateNotice string
+		if version.IsOutdated(cliVersion, latestVer) {
+			updateNotice = fmt.Sprintf("A new version of tunnel is available: %s (current: %s). Run 'tunnel update' or 'go install github.com/bhadrasuman/reverse-tunnel/cmd/tunnel@latest' to upgrade.", latestVer, cliVersion)
 		}
 
 		// --- Step 2: Check tunnel limit ---
@@ -164,9 +197,11 @@ func (s *Server) Handler() http.HandlerFunc {
 		// --- Step 5: Send the "connected" frame ---
 		// Tell the CLI what subdomain was assigned to it.
 		if err := tunnel.WriteJSON(protocol.Frame{
-			Type:      protocol.TypeConnected,
-			Subdomain: sub,
-			Message:   "tunnel established",
+			Type:          protocol.TypeConnected,
+			Subdomain:     sub,
+			Message:       "tunnel established",
+			LatestVersion: latestVer,
+			UpdateNotice:  updateNotice,
 		}); err != nil {
 			s.logger.Error("failed to send connected frame", zap.Error(err))
 			return

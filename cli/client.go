@@ -9,11 +9,13 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/bhadrasuman/reverse-tunnel/internal/protocol"
+	"github.com/bhadrasuman/reverse-tunnel/internal/version"
 	"github.com/gorilla/websocket"
 )
 
@@ -69,13 +71,14 @@ func (c *Client) Start() {
 func (c *Client) connect() error {
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+c.APIKey)
+	headers.Set("User-Agent", fmt.Sprintf("tunnel-cli/%s (%s/%s)", version.Version, runtime.GOOS, runtime.GOARCH))
 
 	dialURL := c.ServerURL
 	sep := "?"
 	if strings.Contains(dialURL, "?") {
 		sep = "&"
 	}
-	dialURL = fmt.Sprintf("%s%sport=%d", dialURL, sep, c.LocalPort)
+	dialURL = fmt.Sprintf("%s%sport=%d&version=%s", dialURL, sep, c.LocalPort, url.QueryEscape(version.Version))
 	if c.Name != "" {
 		dialURL = fmt.Sprintf("%s&name=%s", dialURL, url.QueryEscape(c.Name))
 	}
@@ -88,6 +91,9 @@ func (c *Client) connect() error {
 			}
 			if resp.StatusCode == http.StatusConflict {
 				return fmt.Errorf("subdomain is active in another session (409 Conflict)")
+			}
+			if resp.StatusCode == http.StatusUpgradeRequired {
+				return fmt.Errorf("CLI version %s is obsolete. Please run 'tunnel update' to upgrade", version.Version)
 			}
 		}
 		return fmt.Errorf("dial failed: %w", err)
@@ -110,6 +116,9 @@ func (c *Client) connect() error {
 
 	if firstFrame.Type == protocol.TypeConnected {
 		PrintBanner(firstFrame.Subdomain, extractDomain(c.ServerURL))
+		if firstFrame.UpdateNotice != "" {
+			PrintUpdateNotice(firstFrame.UpdateNotice)
+		}
 	}
 
 	// readLoop blocks here until the WebSocket connection closes.

@@ -63,6 +63,14 @@ func PrintBanner(subdomain, domain string) {
 	fmt.Println()
 }
 
+// PrintUpdateNotice displays a highlighted banner if a CLI update is available.
+func PrintUpdateNotice(notice string) {
+	if notice == "" {
+		return
+	}
+	fmt.Printf("  %sNotice:%s %s%s%s\n\n", colorYellow+colorBold, colorReset, colorYellow, notice, colorReset)
+}
+
 // LogRequest prints a single-line log entry for each proxied HTTP request.
 // Format: "  METHOD  /path/truncated...               STATUS  12ms"
 //

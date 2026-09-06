@@ -22,7 +22,7 @@ export default async function DashboardPage() {
       {/* Greeting */}
       <div>
         <h1 className="text-2xl font-bold text-white">
-          {getGreeting()}, {firstName} 👋
+          {getGreeting()}, {firstName}
         </h1>
         <p className="text-gray-400 mt-1 text-sm">
           Manage your tunnels and API key from here.

@@ -5,6 +5,7 @@ Welcome to the **Reverse Tunnel** docs! This project is a self-hosted alternativ
 ## Quick Links
 - [CLI Usage Guide](./cli-usage.md)
 - [Deployment Guide](./deployment.md)
+- [Developer Guide](./development-workflow.md)
 - [Troubleshooting](./troubleshooting.md)
 - [Roadmap](./roadmap.md)
 
@@ -27,7 +28,7 @@ Welcome to the **Reverse Tunnel** docs! This project is a self-hosted alternativ
 ```text
 Your Browser
         │
-        │ visits https://brave-wolf-42.yourdomain.com
+        │ visits https://bhadrasuman-3000.quickshelf.online
         ▼
     [ Nginx ] (Cloud Server)
         │

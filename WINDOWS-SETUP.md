@@ -1,4 +1,4 @@
-# 🛡️ Windows Development Setup
+# Windows Development Setup
 
 ## IMMEDIATE ACTION REQUIRED
 

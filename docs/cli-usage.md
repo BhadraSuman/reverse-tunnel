@@ -71,4 +71,29 @@ tunnel config --key <key> --server <url>
 ```
 
 ### `tunnel version`
-Prints the current CLI version.
+Prints detailed version metadata (version string, OS/arch target, Git commit SHA, and build timestamp).
+
+```bash
+tunnel version
+# Output: tunnel v0.1.0 (windows/amd64) commit:dev built:unknown
+```
+
+### `tunnel update`
+Checks the GitHub Releases API for new CLI releases and provides instant update instructions or downloads.
+
+```bash
+tunnel update
+# Output: Checking for updates (current version: v0.1.0)...
+# Output: You are already on the latest version (v0.1.0).
+```
+
+### `tunnel --help` / `tunnel <command> --help`
+Displays built-in CLI help, list of available commands, and all flag aliases.
+
+```bash
+# View general CLI help & subcommands
+tunnel --help   # or tunnel -h
+
+# View command-specific flags
+tunnel start --help
+```

@@ -10,10 +10,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/bhadrasuman/reverse-tunnel/cli"
+	"github.com/bhadrasuman/reverse-tunnel/internal/version"
 	"github.com/spf13/cobra"
 )
 
@@ -203,12 +206,57 @@ func main() {
 		Use:   "version",
 		Short: "Print version information",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("tunnel v0.1.0")
+			fmt.Println(version.Info())
+		},
+	}
+
+	// -------------------------------------------------------------------------
+	// tunnel update
+	// -------------------------------------------------------------------------
+
+	updateCmd := &cobra.Command{
+		Use:   "update",
+		Short: "Check for CLI updates and upgrade instructions",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("Checking for updates (current version: %s)...\n", version.Version)
+			req, err := http.NewRequest("GET", "https://api.github.com/repos/bhadrasuman/reverse-tunnel/releases/latest", nil)
+			if err != nil {
+				fmt.Printf("Failed to create update request: %v\n", err)
+				return
+			}
+			req.Header.Set("User-Agent", "tunnel-cli/"+version.Version)
+
+			client := &http.Client{Timeout: 5 * time.Second}
+			resp, err := client.Do(req)
+			if err != nil || resp.StatusCode != http.StatusOK {
+				fmt.Println("Could not reach GitHub Releases API. To update manually, run:")
+				fmt.Println("  go install github.com/bhadrasuman/reverse-tunnel/cmd/tunnel@latest")
+				return
+			}
+			defer resp.Body.Close()
+
+			var release struct {
+				TagName string `json:"tag_name"`
+				HTMLURL string `json:"html_url"`
+			}
+			if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+				fmt.Println("Failed to parse release information.")
+				return
+			}
+
+			if version.IsOutdated(version.Version, release.TagName) {
+				fmt.Printf("A new version (%s) is available!\n", release.TagName)
+				fmt.Printf("Release notes: %s\n", release.HTMLURL)
+				fmt.Println("\nTo upgrade, run:")
+				fmt.Println("  go install github.com/bhadrasuman/reverse-tunnel/cmd/tunnel@latest")
+			} else {
+				fmt.Printf("You are already on the latest version (%s).\n", version.Version)
+			}
 		},
 	}
 
 	// Register all subcommands with the root command.
-	rootCmd.AddCommand(startCmd, configCmd, versionCmd)
+	rootCmd.AddCommand(startCmd, configCmd, versionCmd, updateCmd)
 
 	// Execute parses os.Args and runs the matched command.
 	// Cobra handles --help, unknown flags, and subcommand routing automatically.

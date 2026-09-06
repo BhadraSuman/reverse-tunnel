@@ -71,8 +71,14 @@ type Frame struct {
 	// Status is the HTTP response status code (e.g. 200, 404).
 	Status int `json:"status,omitempty"`
 
-	// --- Error / info fields ---
+	// --- Error / info / version fields ---
 
 	// Message carries human-readable text for TypeError or TypeConnected frames.
 	Message string `json:"message,omitempty"`
+
+	// LatestVersion carries the current latest CLI version string available from server.
+	LatestVersion string `json:"latestVersion,omitempty"`
+
+	// UpdateNotice carries an upgrade recommendation banner text if the client CLI is outdated.
+	UpdateNotice string `json:"updateNotice,omitempty"`
 }

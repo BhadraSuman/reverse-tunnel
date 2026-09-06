@@ -38,11 +38,14 @@ tunnel config --key tk_YOUR_FULL_KEY --server wss://tunnel.quickshelf.online
 ## Commands
 
 ### `tunnel start`
-Starts the reverse tunnel, exposing a local port to the public internet.
+Starts the reverse tunnel, exposing a local port to the public internet under your isolated account namespace.
 
 ```bash
-# Expose local port 3000 using saved config
+# Expose local port 3000 (URL: https://<username>-3000.quickshelf.online)
 tunnel start --port 3000
+
+# Specify a custom project name (URL: https://<username>-billing.quickshelf.online)
+tunnel start --port 3000 --name billing
 
 # Override config values on the fly
 tunnel start --port 8080 --server wss://tunnel.quickshelf.online --key tk_...
@@ -51,8 +54,11 @@ tunnel start --port 8080 --server wss://tunnel.quickshelf.online --key tk_...
 **Output:**
 ```text
   ⟳  Connecting to wss://tunnel.quickshelf.online...
-  ✔  Tunnel live → https://brave-wolf-42.quickshelf.online
+  ✔  Tunnel live → https://bhadrasuman-3000.quickshelf.online
 ```
+
+**Namespace Security & Predictable URLs:**
+Every tunnel URL is strictly prefixed with your verified account handle (`username`). Because URLs are deterministic (`<username>-<port>`), restarting the CLI re-attaches to the exact same URL every single time, keeping Stripe and GitHub webhooks working without re-configuration. Other users cannot claim or hijack any subdomains in your namespace.
 
 **Auto-reconnect:**
 If the connection drops (e.g., internet hiccup), the CLI uses exponential backoff to reconnect seamlessly: `1s → 2s → 4s → 8s → ...` capped at a maximum of `30s`.

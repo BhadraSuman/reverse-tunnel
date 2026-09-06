@@ -31,6 +31,12 @@ type User struct {
 	// Name is the user's display name.
 	Name string `bson:"name" json:"name"`
 
+	// Username is the user's GitHub handle (e.g. "bhadrasuman").
+	Username string `bson:"username,omitempty" json:"username,omitempty"`
+
+	// Subdomain is the user's base isolated subdomain namespace.
+	Subdomain string `bson:"subdomain,omitempty" json:"subdomain,omitempty"`
+
 	// AvatarURL is the GitHub profile picture URL.
 	AvatarURL string `bson:"avatarUrl" json:"avatarUrl"`
 

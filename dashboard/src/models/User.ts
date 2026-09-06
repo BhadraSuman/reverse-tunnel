@@ -5,6 +5,8 @@ const userSchema = new Schema(
     githubId: { type: String, unique: true, required: true, index: true },
     email: { type: String, default: '' },
     name: { type: String, default: '' },
+    username: { type: String, default: '' },
+    subdomain: { type: String, default: '' },
     avatarUrl: { type: String, default: '' },
     apiKeyHash: { type: String, select: false },
     apiKeyPrefix: { type: String, default: '' },

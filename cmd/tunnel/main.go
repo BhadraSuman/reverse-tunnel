@@ -99,21 +99,19 @@ func main() {
 	// -------------------------------------------------------------------------
 
 	var (
-		startPort   int
-		startKey    string
-		startServer string
+		startPort      int
+		startKey       string
+		startServer    string
+		startName      string
+		startSubdomain string
 	)
 
 	startCmd := &cobra.Command{
 		Use:   "start",
 		Short: "Start a tunnel to expose a local port",
-		// RunE is like Run but returns an error. Cobra prints the error
-		// and exits with code 1 if RunE returns non-nil.
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := loadConfig()
 
-			// Merge: flag > config file > default
-			// cmd.Flags().Changed("key") tells us if the user explicitly set --key
 			key := startKey
 			if key == "" {
 				key = cfg.Key
@@ -127,25 +125,30 @@ func main() {
 				server = cfg.Server
 			}
 			if server == "" {
-				server = "wss://tunnel.yourdomain.com"
+				server = "wss://tunnel.quickshelf.online"
 			}
 
 			if startPort == 0 {
 				return fmt.Errorf("--port is required")
 			}
 
+			name := startName
+			if name == "" {
+				name = startSubdomain
+			}
+
 			// cli.NewClient creates the tunnel client; Start() blocks indefinitely.
-			client := cli.NewClient(server, key, startPort)
+			client := cli.NewClient(server, key, startPort, name)
 			client.Start() // never returns under normal operation
 			return nil
 		},
 	}
 
-	// Flags are defined using method chaining on Flags() — similar to yargs in Node.
-	// The "p" in StringVarP is the short flag alias (-p).
 	startCmd.Flags().IntVarP(&startPort, "port", "p", 0, "Local port to expose (required)")
 	startCmd.Flags().StringVarP(&startKey, "key", "k", "", "API key (or set via config)")
 	startCmd.Flags().StringVarP(&startServer, "server", "s", "", "Server WebSocket URL")
+	startCmd.Flags().StringVarP(&startName, "name", "n", "", "Custom project/subdomain name (e.g. --name billing)")
+	startCmd.Flags().StringVar(&startSubdomain, "subdomain", "", "Alias for --name")
 	// MarkRequired makes Cobra enforce the flag — prints a clear error if missing.
 	if err := startCmd.MarkFlagRequired("port"); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to mark port as required: %v\n", err)

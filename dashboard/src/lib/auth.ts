@@ -13,15 +13,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       await connectDB()
 
       const githubId = String(profile?.id || account.providerAccountId)
+      const username = (profile as any)?.login || user.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user'
 
       await User.findOneAndUpdate(
         { githubId },
         {
-          $setOnInsert: {
-            githubId,
+          $set: {
+            username,
             email: user.email || '',
             name: user.name || '',
             avatarUrl: user.image || '',
+          },
+          $setOnInsert: {
+            githubId,
+            subdomain: username,
             maxTunnels: 3,
             createdAt: new Date(),
           },

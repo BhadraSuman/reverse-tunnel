@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bhadrasuman/reverse-tunnel/internal/auth"
@@ -91,20 +92,62 @@ func (s *Server) Handler() http.HandlerFunc {
 			return
 		}
 
-		// --- Step 3: Upgrade to WebSocket ---
-		// After Upgrade(), we can no longer write HTTP responses.
-		// All communication must go through the WebSocket conn.
+		// --- Step 4: Set up Strict Account Namespace Subdomain ---
+		userHandle := user.Username
+		if userHandle == "" {
+			if user.Name != "" {
+				userHandle = subdomain.NormalizeHandle(user.Name)
+			} else if user.Email != "" {
+				userHandle = subdomain.NormalizeHandle(strings.Split(user.Email, "@")[0])
+			} else {
+				userHandle = "user"
+			}
+		}
+
+		reqName := r.URL.Query().Get("name")
+		if reqName == "" {
+			reqName = r.URL.Query().Get("subdomain")
+		}
+		reqPort := r.URL.Query().Get("port")
+		if reqPort == "" {
+			reqPort = "3000"
+		}
+
+		var sub string
+		if reqName != "" {
+			if subdomain.IsSystemReserved(reqName) {
+				writeJSON(w, http.StatusForbidden, map[string]string{
+					"error": "subdomain is reserved for system infrastructure",
+				})
+				return
+			}
+			sub = subdomain.BuildScopedSubdomain(userHandle, reqName)
+		} else {
+			sub = subdomain.BuildScopedSubdomain(userHandle, reqPort)
+		}
+
+		// Check if subdomain is already active in registry
+		if existing, ok := s.registry.Get(sub); ok {
+			if existing.UserID != userID {
+				writeJSON(w, http.StatusConflict, map[string]string{
+					"error":     "subdomain is active in another account",
+					"subdomain": sub,
+				})
+				return
+			}
+			// Re-connection by same user: close old active tunnel to prevent zombie session
+			existing.Conn.Close()
+			s.registry.Unregister(sub)
+		}
+
+		// Upgrade to WebSocket
 		conn, err := s.upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			// Upgrade writes its own error response if it fails, so we just log.
 			s.logger.Error("websocket upgrade failed", zap.Error(err))
 			return
 		}
 
-		// --- Step 4: Set up tunnel ---
-		sub := subdomain.Generate()
 		tunnel := registry.NewTunnel(conn, userID, sub)
-
 		s.registry.Register(sub, tunnel)
 
 		// defer runs when this function returns — whether normally, via return,

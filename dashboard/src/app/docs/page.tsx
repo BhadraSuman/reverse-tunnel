@@ -282,17 +282,27 @@ export default function DocsPage() {
                     </thead>
                     <tbody className="divide-y divide-zinc-800/60 bg-zinc-950">
                       <tr>
-                        <td className="p-3 text-emerald-400 font-bold">--port</td>
+                        <td className="p-3 text-emerald-400 font-bold">--port, -p</td>
                         <td className="p-3 text-zinc-500">3000</td>
                         <td className="p-3 text-zinc-300">Local HTTP port to forward traffic to</td>
                       </tr>
                       <tr>
-                        <td className="p-3 text-emerald-400 font-bold">--server</td>
+                        <td className="p-3 text-emerald-400 font-bold">--name, -n</td>
+                        <td className="p-3 text-zinc-500">&lt;port&gt;</td>
+                        <td className="p-3 text-zinc-300">Custom project name (generates `username-name.quickshelf.online`)</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 text-emerald-400 font-bold">--subdomain</td>
+                        <td className="p-3 text-zinc-500">Alias</td>
+                        <td className="p-3 text-zinc-300">Alias for `--name`</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 text-emerald-400 font-bold">--server, -s</td>
                         <td className="p-3 text-zinc-500">Saved Config</td>
                         <td className="p-3 text-zinc-300">Control plane WebSocket URL (`wss://...`)</td>
                       </tr>
                       <tr>
-                        <td className="p-3 text-emerald-400 font-bold">--key</td>
+                        <td className="p-3 text-emerald-400 font-bold">--key, -k</td>
                         <td className="p-3 text-zinc-500">Saved Config</td>
                         <td className="p-3 text-zinc-300">51-character CLI authentication API key</td>
                       </tr>

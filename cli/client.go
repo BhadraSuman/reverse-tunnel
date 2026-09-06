@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -29,31 +30,23 @@ type Client struct {
 	// LocalPort is the localhost port to forward requests to (e.g. 3000).
 	LocalPort int
 
-	// retries tracks consecutive failed connection attempts, used for
-	// exponential backoff delay calculation.
+	// Name is the custom project/subdomain name requested by the user.
+	Name string
+
+	// retries tracks consecutive failed connection attempts
 	retries int
-
-	// conn is the active WebSocket connection. It is replaced on reconnect.
-	// Protected implicitly by the sequential connect() → readLoop() flow.
-	conn *websocket.Conn
-
-	// writeMu ensures only one goroutine writes to conn at a time.
-	// In the read loop, the caller goroutine reads; forwardRequest goroutines write.
-	// gorilla/websocket allows one concurrent reader AND one concurrent writer —
-	// but we may have many forwardRequest goroutines, so we serialize writes.
+	conn    *websocket.Conn
 	writeMu sync.Mutex
-
-	// done is a channel used to signal shutdown.
-	// chan struct{} is idiomatic Go for a signal-only channel (no data, just close).
-	done chan struct{}
+	done    chan struct{}
 }
 
 // NewClient creates a new tunnel Client.
-func NewClient(serverURL, apiKey string, localPort int) *Client {
+func NewClient(serverURL, apiKey string, localPort int, name string) *Client {
 	return &Client{
 		ServerURL: serverURL,
 		APIKey:    apiKey,
 		LocalPort: localPort,
+		Name:      name,
 		done:      make(chan struct{}),
 	}
 }
@@ -64,11 +57,9 @@ func (c *Client) Start() {
 	PrintConnecting(c.ServerURL)
 
 	for {
-		// connect() blocks until the WebSocket connection drops.
 		if err := c.connect(); err != nil {
 			fmt.Printf("  connection error: %v\n", err)
 		}
-		// Whether connect() returns nil or an error, we always reconnect.
 		c.scheduleReconnect()
 	}
 }
@@ -79,10 +70,26 @@ func (c *Client) connect() error {
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+c.APIKey)
 
-	// websocket.DefaultDialer.Dial performs the WebSocket handshake over TCP.
-	// The third return value is the HTTP upgrade response — not needed here.
-	conn, _, err := websocket.DefaultDialer.Dial(c.ServerURL, headers)
+	dialURL := c.ServerURL
+	sep := "?"
+	if strings.Contains(dialURL, "?") {
+		sep = "&"
+	}
+	dialURL = fmt.Sprintf("%s%sport=%d", dialURL, sep, c.LocalPort)
+	if c.Name != "" {
+		dialURL = fmt.Sprintf("%s&name=%s", dialURL, url.QueryEscape(c.Name))
+	}
+
+	conn, resp, err := websocket.DefaultDialer.Dial(dialURL, headers)
 	if err != nil {
+		if resp != nil {
+			if resp.StatusCode == http.StatusForbidden {
+				return fmt.Errorf("subdomain is reserved or restricted (403 Forbidden)")
+			}
+			if resp.StatusCode == http.StatusConflict {
+				return fmt.Errorf("subdomain is active in another session (409 Conflict)")
+			}
+		}
 		return fmt.Errorf("dial failed: %w", err)
 	}
 	defer conn.Close() //nolint:errcheck — cleanup on return

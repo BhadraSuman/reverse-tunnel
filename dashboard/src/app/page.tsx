@@ -56,6 +56,9 @@ export default async function HomePage() {
             <a href="#faq" className="hover:text-white transition-colors">
               FAQ
             </a>
+            <a href="/docs" className="hover:text-white transition-colors text-violet-400 font-semibold">
+              Docs
+            </a>
           </nav>
 
           <div className="flex items-center gap-3">

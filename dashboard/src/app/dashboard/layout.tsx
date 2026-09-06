@@ -26,6 +26,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
           {/* User Section */}
           <div className="flex items-center gap-3">
+            <a
+              href="/docs"
+              className="text-xs font-mono text-zinc-400 hover:text-white transition-colors bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg hidden sm:block"
+            >
+              Docs 📖
+            </a>
             {session.user?.image && (
               <img
                 src={session.user.image}

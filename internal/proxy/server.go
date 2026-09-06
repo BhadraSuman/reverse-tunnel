@@ -100,7 +100,22 @@ func writeJSONError(w http.ResponseWriter, status int, v any) {
 func (s *Server) Handler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// --- Step 1: Extract subdomain ---
-		sub := extractSubdomain(r.Host, s.domain)
+		host := r.Header.Get("X-Tunnel-Subdomain")
+		if host == "" {
+			host = r.Header.Get("X-Forwarded-Host")
+		}
+		if host == "" {
+			host = r.Host
+		}
+
+		sub := extractSubdomain(host, s.domain)
+		if sub == "" && host != "" {
+			// Fallback: If host is raw subdomain string (e.g. "brave-lynx-8")
+			if !strings.Contains(host, ".") && !strings.Contains(host, ":") {
+				sub = host
+			}
+		}
+
 		if sub == "" {
 			writeJSONError(w, http.StatusBadRequest, map[string]string{
 				"error": "missing subdomain",

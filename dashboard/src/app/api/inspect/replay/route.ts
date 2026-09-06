@@ -22,13 +22,34 @@ export async function POST(req: NextRequest) {
 
     const log = await logRes.json()
 
+    // Filter headers to avoid conflicts in fetch
+    const cleanHeaders: Record<string, string> = {}
+    if (log.requestHeaders) {
+      for (const [k, v] of Object.entries(log.requestHeaders)) {
+        const lowerKey = k.toLowerCase()
+        if (
+          lowerKey !== 'host' &&
+          lowerKey !== 'content-length' &&
+          lowerKey !== 'transfer-encoding' &&
+          lowerKey !== 'connection'
+        ) {
+          cleanHeaders[k] = v as string
+        }
+      }
+    }
+
+    const targetDomain = process.env.DOMAIN || 'quickshelf.online'
+    const fullHost = `${subdomain}.${targetDomain}`
+
     // Perform the replay request against the proxy server (port 4000)
     const proxyUrl = process.env.TUNNEL_PROXY_URL || 'http://localhost:4000'
     const replayRes = await fetch(`${proxyUrl}${log.path}`, {
       method: log.method,
       headers: {
-        ...log.requestHeaders,
-        Host: `${subdomain}.${process.env.DOMAIN || 'localhost'}`,
+        ...cleanHeaders,
+        'Host': fullHost,
+        'X-Forwarded-Host': fullHost,
+        'X-Tunnel-Subdomain': subdomain,
         'X-Tunnel-Replay': 'true',
       },
       body: ['GET', 'HEAD'].includes(log.method.toUpperCase()) ? undefined : log.requestBody,

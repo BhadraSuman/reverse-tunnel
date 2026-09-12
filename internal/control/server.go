@@ -173,6 +173,8 @@ func (s *Server) Handler() http.HandlerFunc {
 			s.registry.Unregister(sub)
 		}
 
+		reqAuth := r.URL.Query().Get("auth")
+
 		// Upgrade to WebSocket
 		conn, err := s.upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -180,7 +182,7 @@ func (s *Server) Handler() http.HandlerFunc {
 			return
 		}
 
-		tunnel := registry.NewTunnel(conn, userID, sub)
+		tunnel := registry.NewTunnel(conn, userID, sub, reqAuth)
 		s.registry.Register(sub, tunnel)
 
 		// defer runs when this function returns — whether normally, via return,

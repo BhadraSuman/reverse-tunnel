@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Terminal, ExternalLink, Wifi, Copy, Check } from 'lucide-react'
+import { Terminal, ExternalLink, Wifi, Copy, Check, Lock } from 'lucide-react'
 import TrafficInspector from './TrafficInspector'
 
 interface Tunnel {
@@ -9,6 +9,7 @@ interface Tunnel {
   userId: string
   connectedAt: string
   reqCount: number
+  isProtected?: boolean
 }
 
 function relativeTime(dateStr: string): string {
@@ -127,9 +128,17 @@ export default function TunnelsTable({ userId }: TunnelsTableProps) {
               {tunnels.map((tunnel) => (
                 <tr key={tunnel.subdomain} className="hover:bg-gray-800/30 transition-colors">
                   <td className="px-6 py-3.5">
-                    <span className="font-mono text-sm bg-gray-800 text-gray-300 px-2.5 py-1 rounded-md">
-                      {tunnel.subdomain}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm bg-gray-800 text-gray-300 px-2.5 py-1 rounded-md">
+                        {tunnel.subdomain}
+                      </span>
+                      {tunnel.isProtected && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono bg-amber-950/80 text-amber-300 border border-amber-800/80 px-2 py-0.5 rounded-full" title="HTTP Basic Auth Protected">
+                          <Lock className="w-2.5 h-2.5 text-amber-400" />
+                          Protected
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-3.5">
                     <div className="flex items-center gap-2">

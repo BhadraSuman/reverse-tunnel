@@ -35,6 +35,9 @@ type Client struct {
 	// Name is the custom project/subdomain name requested by the user.
 	Name string
 
+	// Auth is the optional "user:pass" basic auth protection for the tunnel.
+	Auth string
+
 	// retries tracks consecutive failed connection attempts
 	retries int
 	conn    *websocket.Conn
@@ -43,12 +46,17 @@ type Client struct {
 }
 
 // NewClient creates a new tunnel Client.
-func NewClient(serverURL, apiKey string, localPort int, name string) *Client {
+func NewClient(serverURL, apiKey string, localPort int, name string, auth ...string) *Client {
+	authStr := ""
+	if len(auth) > 0 {
+		authStr = auth[0]
+	}
 	return &Client{
 		ServerURL: serverURL,
 		APIKey:    apiKey,
 		LocalPort: localPort,
 		Name:      name,
+		Auth:      authStr,
 		done:      make(chan struct{}),
 	}
 }
@@ -81,6 +89,9 @@ func (c *Client) connect() error {
 	dialURL = fmt.Sprintf("%s%sport=%d&version=%s", dialURL, sep, c.LocalPort, url.QueryEscape(version.Version))
 	if c.Name != "" {
 		dialURL = fmt.Sprintf("%s&name=%s", dialURL, url.QueryEscape(c.Name))
+	}
+	if c.Auth != "" {
+		dialURL = fmt.Sprintf("%s&auth=%s", dialURL, url.QueryEscape(c.Auth))
 	}
 
 	conn, resp, err := websocket.DefaultDialer.Dial(dialURL, headers)

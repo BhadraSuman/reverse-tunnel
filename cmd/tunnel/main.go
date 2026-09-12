@@ -13,9 +13,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/bhadrasuman/reverse-tunnel/cli"
+	"github.com/bhadrasuman/reverse-tunnel/internal/mcp"
 	"github.com/bhadrasuman/reverse-tunnel/internal/version"
 	"github.com/spf13/cobra"
 )
@@ -107,6 +109,7 @@ func main() {
 		startServer    string
 		startName      string
 		startSubdomain string
+		startAuth      string
 	)
 
 	startCmd := &cobra.Command{
@@ -140,8 +143,12 @@ func main() {
 				name = startSubdomain
 			}
 
+			if startAuth != "" && !strings.Contains(startAuth, ":") {
+				return fmt.Errorf("--auth flag must be in 'username:password' format (e.g. --auth admin:secret123)")
+			}
+
 			// cli.NewClient creates the tunnel client; Start() blocks indefinitely.
-			client := cli.NewClient(server, key, startPort, name)
+			client := cli.NewClient(server, key, startPort, name, startAuth)
 			client.Start() // never returns under normal operation
 			return nil
 		},
@@ -152,6 +159,7 @@ func main() {
 	startCmd.Flags().StringVarP(&startServer, "server", "s", "", "Server WebSocket URL")
 	startCmd.Flags().StringVarP(&startName, "name", "n", "", "Custom project/subdomain name (e.g. --name billing)")
 	startCmd.Flags().StringVar(&startSubdomain, "subdomain", "", "Alias for --name")
+	startCmd.Flags().StringVarP(&startAuth, "auth", "a", "", "HTTP Basic Auth credentials for tunnel protection (username:password)")
 	// MarkRequired makes Cobra enforce the flag — prints a clear error if missing.
 	if err := startCmd.MarkFlagRequired("port"); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to mark port as required: %v\n", err)
@@ -255,8 +263,42 @@ func main() {
 		},
 	}
 
+	// -------------------------------------------------------------------------
+	// tunnel mcp
+	// -------------------------------------------------------------------------
+
+	var mcpServerURL string
+
+	mcpCmd := &cobra.Command{
+		Use:   "mcp",
+		Short: "Run the Model Context Protocol (MCP) server over stdin/stdout for AI assistants",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if mcpServerURL == "" {
+				mcpServerURL = os.Getenv("TUNNEL_API_URL")
+			}
+			if mcpServerURL == "" {
+				cfg := loadConfig()
+				if cfg.Server != "" {
+					// Convert wss://... to http://... internal API URL if needed
+					srv := cfg.Server
+					srv = strings.Replace(srv, "wss://", "https://", 1)
+					srv = strings.Replace(srv, "ws://", "http://", 1)
+					mcpServerURL = srv
+				}
+			}
+			if mcpServerURL == "" {
+				mcpServerURL = "http://localhost:3002"
+			}
+
+			srv := mcp.NewServer(mcpServerURL)
+			return srv.Run()
+		},
+	}
+
+	mcpCmd.Flags().StringVar(&mcpServerURL, "api-url", "", "Internal API URL (e.g. http://localhost:3002)")
+
 	// Register all subcommands with the root command.
-	rootCmd.AddCommand(startCmd, configCmd, versionCmd, updateCmd)
+	rootCmd.AddCommand(startCmd, configCmd, versionCmd, updateCmd, mcpCmd)
 
 	// Execute parses os.Args and runs the matched command.
 	// Cobra handles --help, unknown flags, and subcommand routing automatically.

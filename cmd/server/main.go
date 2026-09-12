@@ -162,6 +162,7 @@ func main() {
 				UserID      string    `json:"userId"`
 				ConnectedAt time.Time `json:"connectedAt"`
 				ReqCount    int64     `json:"reqCount"`
+				IsProtected bool      `json:"isProtected"`
 			}
 
 			dtos := make([]tunnelDTO, 0, len(tunnels))
@@ -171,6 +172,7 @@ func main() {
 					UserID:      t.UserID,
 					ConnectedAt: t.ConnectedAt,
 					ReqCount:    t.ReqCount.Load(),
+					IsProtected: t.Auth != "",
 				})
 			}
 

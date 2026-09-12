@@ -47,6 +47,9 @@ tunnel start --port 3000
 # Specify a custom project name (URL: https://<username>-billing.quickshelf.online)
 tunnel start --port 3000 --name billing
 
+# Protect your tunnel with HTTP Basic Auth (username:password)
+tunnel start --port 3000 --auth admin:secret123
+
 # Override config values on the fly
 tunnel start --port 8080 --server wss://tunnel.quickshelf.online --key tk_...
 ```
@@ -56,6 +59,9 @@ tunnel start --port 8080 --server wss://tunnel.quickshelf.online --key tk_...
   ⟳  Connecting to wss://tunnel.quickshelf.online...
   ✔  Tunnel live → https://bhadrasuman-3000.quickshelf.online
 ```
+
+**Password Protection (HTTP Basic Auth):**
+When `--auth admin:secret123` is specified, external visitors reaching your public tunnel URL will be challenged with an HTTP Basic Auth prompt. Invalid credentials return `HTTP 401 Unauthorized` with `WWW-Authenticate: Basic realm="Protected Tunnel"`.
 
 **Namespace Security & Predictable URLs:**
 Every tunnel URL is strictly prefixed with your verified account handle (`username`). Because URLs are deterministic (`<username>-<port>`), restarting the CLI re-attaches to the exact same URL every single time, keeping Stripe and GitHub webhooks working without re-configuration. Other users cannot claim or hijack any subdomains in your namespace.
@@ -85,6 +91,28 @@ Checks the GitHub Releases API for new CLI releases and provides instant update 
 tunnel update
 # Output: Checking for updates (current version: v0.1.0)...
 # Output: You are already on the latest version (v0.1.0).
+```
+
+### `tunnel mcp`
+Runs the Model Context Protocol (MCP) server over stdin/stdout for integration with AI assistants (Claude Code, Cursor, Antigravity).
+
+```bash
+tunnel mcp
+```
+
+**MCP Configuration Example (Claude Desktop / Cursor):**
+```json
+{
+  "mcpServers": {
+    "reverse-tunnel": {
+      "command": "tunnel",
+      "args": ["mcp"],
+      "env": {
+        "TUNNEL_API_URL": "http://localhost:3002"
+      }
+    }
+  }
+}
 ```
 
 ### `tunnel --help` / `tunnel <command> --help`

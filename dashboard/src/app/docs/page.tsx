@@ -493,6 +493,25 @@ export default function DocsPage() {
                       </button>
                     </div>
                   </div>
+                  {/* tunnel mcp */}
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-emerald-400 font-bold text-sm">tunnel mcp</span>
+                      <span className="text-zinc-500 text-[11px]">AI Model Context Protocol Server</span>
+                    </div>
+                    <p className="text-zinc-300 font-sans text-xs">
+                      Runs the Model Context Protocol (MCP) server over stdin/stdout for AI assistants (Claude Code, Cursor, Antigravity) to query traffic and trigger replays.
+                    </p>
+                    <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-emerald-400 flex items-center justify-between">
+                      <code>tunnel mcp</code>
+                      <button
+                        onClick={() => handleCopy('tunnel mcp', 'ref-mcp')}
+                        className="text-zinc-400 hover:text-white transition-colors"
+                      >
+                        {copiedCode === 'ref-mcp' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -518,6 +537,11 @@ export default function DocsPage() {
                         <td className="p-3 text-emerald-400 font-bold">--port, -p</td>
                         <td className="p-3 text-zinc-500">3000</td>
                         <td className="p-3 text-zinc-300 font-sans">Local HTTP port your local server listens on</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 text-emerald-400 font-bold">--auth, -a</td>
+                        <td className="p-3 text-zinc-500">None</td>
+                        <td className="p-3 text-zinc-300 font-sans">HTTP Basic Auth protection (`username:password`)</td>
                       </tr>
                       <tr>
                         <td className="p-3 text-emerald-400 font-bold">--name, -n</td>

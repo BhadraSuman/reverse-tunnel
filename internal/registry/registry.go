@@ -22,6 +22,7 @@ type Tunnel struct {
 	Conn        *websocket.Conn
 	UserID      string
 	Subdomain   string
+	Auth        string // "user:pass" for Basic Auth HTTP protection
 	ConnectedAt time.Time
 
 	// ReqCount tracks total proxied requests. atomic.Int64 (from sync/atomic) is a
@@ -48,11 +49,16 @@ type Tunnel struct {
 
 // NewTunnel constructs a Tunnel and initializes the pending map.
 // In Go, maps must be initialized with make() before use — a nil map panics on write.
-func NewTunnel(conn *websocket.Conn, userID, subdomain string) *Tunnel {
+func NewTunnel(conn *websocket.Conn, userID, subdomain string, auth ...string) *Tunnel {
+	authStr := ""
+	if len(auth) > 0 {
+		authStr = auth[0]
+	}
 	return &Tunnel{
 		Conn:        conn,
 		UserID:      userID,
 		Subdomain:   subdomain,
+		Auth:        authStr,
 		ConnectedAt: time.Now(),
 		pending:     make(map[string]chan protocol.Frame),
 	}

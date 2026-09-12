@@ -133,6 +133,19 @@ func (s *Server) Handler() http.HandlerFunc {
 			return
 		}
 
+		// --- Step 2b: Enforce Password Protection (Basic Auth) ---
+		if tunnel.Auth != "" {
+			user, pass, hasAuth := r.BasicAuth()
+			expectedUser, expectedPass, _ := strings.Cut(tunnel.Auth, ":")
+			if !hasAuth || user != expectedUser || pass != expectedPass {
+				w.Header().Set("WWW-Authenticate", `Basic realm="Protected Tunnel"`)
+				writeJSONError(w, http.StatusUnauthorized, map[string]string{
+					"error": "unauthorized - basic auth required",
+				})
+				return
+			}
+		}
+
 		// --- Step 3: Read request body ---
 		// io.LimitReader caps the body at 10MB to protect against huge payloads.
 		// This is like express's bodyParser with a size limit.

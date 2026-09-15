@@ -14,21 +14,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-violet-600/10 blur-[130px] rounded-full pointer-events-none -z-10" />
 
       {/* Floating Glassmorphism Navbar */}
-      <header className="sticky top-4 z-40 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto backdrop-blur-xl bg-zinc-950/80 border border-zinc-800/80 rounded-2xl px-5 h-14 flex items-center justify-between shadow-2xl shadow-black/80">
+      <header className="sticky top-4 z-40 px-3 sm:px-6">
+        <div className="max-w-5xl mx-auto backdrop-blur-xl bg-zinc-950/80 border border-zinc-800/80 rounded-2xl px-4 sm:px-5 h-14 flex items-center justify-between shadow-2xl shadow-black/80">
           {/* Logo */}
-          <a href="/dashboard" className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-violet-600/20 border border-violet-500/30">
+          <a href="/dashboard" className="flex items-center gap-2.5">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-violet-600/20 border border-violet-500/30">
               <Terminal className="w-4 h-4 text-violet-400" />
             </div>
-            <span className="font-bold text-base text-white tracking-tight">Reverse Tunnel</span>
+            <span className="font-bold text-sm sm:text-base text-white tracking-tight">Reverse Tunnel</span>
           </a>
 
           {/* User Section */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <a
               href="/docs"
-              className="text-xs font-mono text-zinc-400 hover:text-white transition-colors bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg hidden sm:block"
+              className="text-xs font-mono text-zinc-300 hover:text-white transition-colors bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 rounded-lg"
             >
               Docs
             </a>
@@ -41,7 +41,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 className="w-7 h-7 rounded-full ring-1 ring-zinc-700"
               />
             )}
-            <span className="text-xs font-medium text-zinc-300 hidden sm:block font-mono">{session.user?.name}</span>
+            <span className="text-xs font-medium text-zinc-300 hidden md:block font-mono">{session.user?.name}</span>
             <SignOutButton />
           </div>
         </div>

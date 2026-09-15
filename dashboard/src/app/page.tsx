@@ -240,8 +240,8 @@ export default async function HomePage() {
               </h2>
             </div>
 
-            <div className="border border-zinc-800/80 rounded-2xl bg-zinc-950/80 overflow-hidden backdrop-blur-md shadow-xl">
-              <table className="w-full text-left text-xs border-collapse font-sans">
+            <div className="border border-zinc-800/80 rounded-2xl bg-zinc-950/80 overflow-x-auto backdrop-blur-md shadow-xl">
+              <table className="w-full min-w-[600px] text-left text-xs border-collapse font-sans">
                 <thead>
                   <tr className="border-b border-zinc-800/80 text-zinc-400 font-mono text-[11px] bg-zinc-900/50">
                     <th className="py-4 px-6 font-medium text-zinc-400">Feature</th>

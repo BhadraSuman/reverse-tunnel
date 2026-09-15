@@ -143,32 +143,32 @@ export default function TrafficInspector({ subdomain }: TrafficInspectorProps) {
                 {/* Request Bar Header */}
                 <div
                   onClick={() => toggleExpand(log.id)}
-                  className="flex items-center justify-between p-3.5 cursor-pointer hover:bg-gray-900/50 transition-colors"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-3.5 gap-2.5 sm:gap-4 cursor-pointer hover:bg-gray-900/50 transition-colors"
                 >
-                  <div className="flex items-center gap-3 font-mono text-sm">
+                  <div className="flex items-center gap-2 sm:gap-3 font-mono text-xs sm:text-sm min-w-0 w-full sm:w-auto">
                     {isExpanded ? (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                      <ChevronDown className="w-4 h-4 text-gray-500 shrink-0" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                      <ChevronRight className="w-4 h-4 text-gray-500 shrink-0" />
                     )}
-                    <span className={`px-2 py-0.5 text-xs rounded border font-semibold ${getMethodBadge(log.method)}`}>
+                    <span className={`px-2 py-0.5 text-[11px] sm:text-xs rounded border font-semibold shrink-0 ${getMethodBadge(log.method)}`}>
                       {log.method}
                     </span>
-                    <span className={`px-2 py-0.5 text-xs rounded border font-semibold ${getStatusColor(log.responseStatus)}`}>
+                    <span className={`px-2 py-0.5 text-[11px] sm:text-xs rounded border font-semibold shrink-0 ${getStatusColor(log.responseStatus)}`}>
                       {log.responseStatus}
                     </span>
-                    <span className="text-gray-200 truncate max-w-xs sm:max-w-md">{log.path}</span>
+                    <span className="text-gray-200 truncate max-w-[150px] sm:max-w-md">{log.path}</span>
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs text-gray-400 font-mono">
-                    <span className="flex items-center gap-1">
+                  <div className="flex items-center justify-between w-full sm:w-auto gap-3 text-[11px] sm:text-xs text-gray-400 font-mono pl-6 sm:pl-0">
+                    <span className="flex items-center gap-1 shrink-0">
                       <Clock className="w-3.5 h-3.5 text-gray-500" />
                       {log.durationMs}ms
                     </span>
                     <button
                       onClick={(e) => handleReplay(log, e)}
                       disabled={isReplaying}
-                      className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white px-2.5 py-1 rounded text-xs transition-colors"
+                      className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white px-2.5 py-1 rounded text-xs transition-colors shrink-0"
                     >
                       {isReplayed ? (
                         <>

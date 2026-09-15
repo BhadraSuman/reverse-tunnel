@@ -104,7 +104,7 @@ export default function DocsPage() {
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Left Sidebar Navigation */}
-        <aside className="lg:col-span-1 space-y-6">
+        <aside className="lg:col-span-1 space-y-4 lg:space-y-6">
           {/* Search Box */}
           <div className="relative">
             <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
@@ -117,8 +117,29 @@ export default function DocsPage() {
             />
           </div>
 
-          {/* Navigation Links */}
-          <nav className="space-y-1 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl p-3 backdrop-blur-xl shadow-xl">
+          {/* Mobile Horizontal Pill Tabs (visible only on mobile/tablet < 1024px) */}
+          <div className="flex lg:hidden overflow-x-auto gap-2 pb-1 -mx-4 px-4 scrollbar-none">
+            {filteredSections.map(({ id, label, icon: Icon }) => {
+              const isActive = activeSection === id
+              return (
+                <button
+                  key={id}
+                  onClick={() => setActiveSection(id)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-mono whitespace-nowrap transition-all shrink-0 ${
+                    isActive
+                      ? 'bg-violet-600 text-white font-semibold shadow-md shadow-violet-950/50'
+                      : 'bg-zinc-900/90 text-zinc-400 hover:text-white border border-zinc-800'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-zinc-500'}`} />
+                  <span>{label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Desktop Navigation List (hidden on mobile/tablet) */}
+          <nav className="hidden lg:block space-y-1 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl p-3 backdrop-blur-xl shadow-xl">
             <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest px-3 py-2">
               User Manual Sections
             </p>

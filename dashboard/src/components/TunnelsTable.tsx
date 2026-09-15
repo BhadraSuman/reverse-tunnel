@@ -114,42 +114,42 @@ export default function TunnelsTable({ userId }: TunnelsTableProps) {
 
       {/* Table */}
       {!loading && !error && tunnels.length > 0 && (
-        <div className="overflow-x-auto -mx-6">
-          <table className="w-full">
+        <div className="overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-0">
+          <table className="w-full min-w-[500px] sm:min-w-0">
             <thead>
               <tr className="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-800">
-                <th className="text-left px-6 pb-3 font-medium">Subdomain</th>
-                <th className="text-left px-6 pb-3 font-medium">URL</th>
-                <th className="text-left px-6 pb-3 font-medium">Connected</th>
-                <th className="text-left px-6 pb-3 font-medium">Requests</th>
+                <th className="text-left px-4 sm:px-6 pb-3 font-medium">Subdomain</th>
+                <th className="text-left px-4 sm:px-6 pb-3 font-medium">URL</th>
+                <th className="text-left px-4 sm:px-6 pb-3 font-medium">Connected</th>
+                <th className="text-left px-4 sm:px-6 pb-3 font-medium">Requests</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/50">
               {tunnels.map((tunnel) => (
                 <tr key={tunnel.subdomain} className="hover:bg-gray-800/30 transition-colors">
-                  <td className="px-6 py-3.5">
+                  <td className="px-4 sm:px-6 py-3.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm bg-gray-800 text-gray-300 px-2.5 py-1 rounded-md">
+                      <span className="font-mono text-xs sm:text-sm bg-gray-800 text-gray-300 px-2 py-1 sm:px-2.5 sm:py-1 rounded-md">
                         {tunnel.subdomain}
                       </span>
                       {tunnel.isProtected && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono bg-amber-950/80 text-amber-300 border border-amber-800/80 px-2 py-0.5 rounded-full" title="HTTP Basic Auth Protected">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono bg-amber-950/80 text-amber-300 border border-amber-800/80 px-2 py-0.5 rounded-full shrink-0" title="HTTP Basic Auth Protected">
                           <Lock className="w-2.5 h-2.5 text-amber-400" />
                           Protected
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-3.5">
+                  <td className="px-4 sm:px-6 py-3.5">
                     <div className="flex items-center gap-2">
                       <a
                         href={`https://${tunnel.subdomain}.${domain}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm text-violet-400 hover:text-violet-300 font-mono transition-colors"
+                        className="flex items-center gap-1.5 text-xs sm:text-sm text-violet-400 hover:text-violet-300 font-mono transition-colors"
                       >
-                        {tunnel.subdomain}.{domain}
-                        <ExternalLink className="w-3 h-3" />
+                        <span className="truncate max-w-[160px] sm:max-w-none">{tunnel.subdomain}.{domain}</span>
+                        <ExternalLink className="w-3 h-3 shrink-0" />
                       </a>
                       <button
                         onClick={async () => {

@@ -98,15 +98,15 @@ export default function ApiKeyCard({ apiKeyPrefix }: ApiKeyCardProps) {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gray-950 border border-gray-800/80 rounded-xl p-4 mb-5">
-            <div>
-              <span className="text-xs text-gray-500 font-mono block mb-1">KEY PREFIX:</span>
-              <code className="font-mono text-sm text-violet-300 tracking-wider font-semibold">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-gray-950 border border-gray-800/80 rounded-xl p-3.5 sm:p-4 mb-5">
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] sm:text-xs text-gray-500 font-mono block mb-1">KEY PREFIX:</span>
+              <code className="font-mono text-xs sm:text-sm text-violet-300 tracking-wider font-semibold break-all">
                 {currentPrefix}••••••••••••••••••••••••••••••••
               </code>
             </div>
 
-            <div className="text-xs text-gray-400 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg font-mono">
+            <div className="text-[11px] sm:text-xs text-gray-400 bg-gray-900 border border-gray-800 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg font-mono shrink-0">
               <span>SHA-256 Encrypted</span>
             </div>
           </div>

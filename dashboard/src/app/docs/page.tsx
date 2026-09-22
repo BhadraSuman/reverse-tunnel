@@ -46,12 +46,13 @@ export default function DocsPage() {
     { id: 'concepts', label: '1. What is a Reverse Tunnel?', icon: Compass },
     { id: 'usermanual', label: '2. Beginner User Manual', icon: BookOpen },
     { id: 'cli', label: '3. CLI Reference & Commands', icon: Terminal },
-    { id: 'frameworks', label: '4. Framework Setup Examples', icon: Code },
-    { id: 'inspector', label: '5. Webhooks & Replay Guide', icon: Activity },
-    { id: 'security', label: '6. Security & Account Isolation', icon: Shield },
-    { id: 'troubleshooting', label: '7. Troubleshooting & Errors', icon: HelpCircle },
-    { id: 'deployment', label: '8. Self-Hosting (GCP & Cloudflare)', icon: Server },
-    { id: 'developer', label: '9. Developer & Contributor Guide', icon: FileText },
+    { id: 'mcp', label: '4. Native MCP Server (AI Agents)', icon: Cpu },
+    { id: 'frameworks', label: '5. Framework Setup Examples', icon: Code },
+    { id: 'inspector', label: '6. Webhooks & Replay Guide', icon: Activity },
+    { id: 'security', label: '7. Security & Account Isolation', icon: Shield },
+    { id: 'troubleshooting', label: '8. Troubleshooting & Errors', icon: HelpCircle },
+    { id: 'deployment', label: '9. Self-Hosting (GCP & Cloudflare)', icon: Server },
+    { id: 'developer', label: '10. Developer & Contributor Guide', icon: FileText },
   ]
 
   const filteredSections = sections.filter((s) =>
@@ -591,7 +592,143 @@ export default function DocsPage() {
             </div>
           )}
 
-          {/* SECTION 4: FRAMEWORK EXAMPLES */}
+          {/* SECTION 4: NATIVE MCP SERVER */}
+          {activeSection === 'mcp' && (
+            <div className="space-y-6">
+              <div>
+                <span className="text-xs font-mono text-violet-400 uppercase tracking-wider bg-violet-950/60 border border-violet-800/60 px-3 py-1 rounded-full">
+                  AI Agent Integration
+                </span>
+                <h1 className="text-3xl font-bold text-white tracking-tight mt-3">
+                  Native MCP Server Setup & Usage
+                </h1>
+                <p className="text-zinc-400 text-sm font-sans mt-1">
+                  Connect AI coding assistants (Claude Desktop, Cursor, Antigravity, VS Code) directly to your reverse tunnels via the Model Context Protocol (MCP).
+                </p>
+              </div>
+
+              {/* What is MCP Box */}
+              <div className="bg-gradient-to-br from-violet-950/40 via-zinc-900/80 to-zinc-900/40 border border-violet-800/40 rounded-2xl p-6 space-y-3">
+                <div className="flex items-center gap-2.5 text-violet-300 font-bold text-base">
+                  <Cpu className="w-5 h-5 text-violet-400" />
+                  <span>How AI Agents Interact with Your Tunnels</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed font-sans">
+                  The <code className="text-violet-300 font-mono">tunnel mcp</code> subcommand launches a native Model Context Protocol (MCP) server over standard input/output (stdio JSON-RPC 2.0). It allows AI agents to inspect your live local HTTP traffic, view request headers & bodies, and automatically replay webhooks without leaving your editor.
+                </p>
+              </div>
+
+              {/* Available Tools Grid */}
+              <div className="space-y-3">
+                <h3 className="text-base font-bold text-white">4 Native MCP Tools</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
+                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 space-y-1.5">
+                    <div className="text-violet-400 font-bold">list_active_tunnels</div>
+                    <p className="text-zinc-400 font-sans text-xs">Returns all active reverse tunnels for your account, target ports, public URLs, and HTTP basic auth status.</p>
+                  </div>
+                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 space-y-1.5">
+                    <div className="text-violet-400 font-bold">list_recent_requests</div>
+                    <p className="text-zinc-400 font-sans text-xs">Fetches recent HTTP requests received by your active tunnels (method, URL path, status code, latency).</p>
+                  </div>
+                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 space-y-1.5">
+                    <div className="text-violet-400 font-bold">get_request_detail</div>
+                    <p className="text-zinc-400 font-sans text-xs">Retrieves complete HTTP headers, query parameters, and raw request/response body for a given request ID.</p>
+                  </div>
+                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 space-y-1.5">
+                    <div className="text-violet-400 font-bold">replay_request</div>
+                    <p className="text-zinc-400 font-sans text-xs">Re-executes any previous HTTP request against your local dev server and returns the live response details.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Setup Walkthrough per Client */}
+              <div className="space-y-4">
+                <h3 className="text-base font-bold text-white">Configuring Your AI Client</h3>
+
+                {/* Claude Desktop */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-bold text-sm">1. Claude Desktop Setup</span>
+                    <span className="text-zinc-500 font-mono text-[11px]">claude_desktop_config.json</span>
+                  </div>
+                  <p className="text-xs text-zinc-400 font-sans">
+                    Add the following entry to your Claude Desktop configuration file (<code className="text-violet-300 font-mono">%APPDATA%\Claude\claude_desktop_config.json</code> on Windows or <code className="text-violet-300 font-mono">~/Library/Application Support/Claude/claude_desktop_config.json</code> on macOS):
+                  </p>
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 font-mono text-xs text-emerald-400 relative">
+                    <pre className="overflow-x-auto">{`{
+  "mcpServers": {
+    "reverse-tunnel": {
+      "command": "tunnel",
+      "args": ["mcp"]
+    }
+  }
+}`}</pre>
+                    <button
+                      onClick={() => handleCopy('{\n  "mcpServers": {\n    "reverse-tunnel": {\n      "command": "tunnel",\n      "args": ["mcp"]\n    }\n  }\n}', 'mcp-claude')}
+                      className="absolute top-3 right-3 text-zinc-400 hover:text-white transition-colors"
+                    >
+                      {copiedCode === 'mcp-claude' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cursor & Antigravity */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-bold text-sm">2. Cursor / Antigravity / VS Code Setup</span>
+                    <span className="text-zinc-500 font-mono text-[11px]">MCP Tool Config</span>
+                  </div>
+                  <p className="text-xs text-zinc-400 font-sans">
+                    In your AI editor settings, add a stdio MCP Server entry with:
+                  </p>
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 font-mono text-xs space-y-1 text-zinc-300">
+                    <div><span className="text-zinc-500">Server Name:</span> <span className="text-violet-300">reverse-tunnel</span></div>
+                    <div><span className="text-zinc-500">Command:</span> <span className="text-emerald-400">tunnel</span></div>
+                    <div><span className="text-zinc-500">Arguments:</span> <span className="text-emerald-400">mcp</span></div>
+                  </div>
+                </div>
+
+                {/* Manual CLI Test */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-bold text-sm">3. How to Test the MCP Server Yourself</span>
+                    <span className="text-zinc-500 font-mono text-[11px]">Direct Terminal Verification</span>
+                  </div>
+                  <p className="text-xs text-zinc-400 font-sans">
+                    You can test the MCP server manually in your terminal using raw JSON-RPC 2.0 protocol frames:
+                  </p>
+                  <div className="space-y-2 font-mono text-xs">
+                    <div className="text-zinc-500 text-[11px]">Step 1: Launch MCP mode in terminal</div>
+                    <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-emerald-400 flex items-center justify-between">
+                      <code>tunnel mcp</code>
+                      <button
+                        onClick={() => handleCopy('tunnel mcp', 'mcp-test-cmd')}
+                        className="text-zinc-400 hover:text-white transition-colors"
+                      >
+                        {copiedCode === 'mcp-test-cmd' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    <div className="text-zinc-500 text-[11px]">Step 2: Paste this JSON-RPC frame and hit Enter</div>
+                    <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-emerald-400 flex items-center justify-between">
+                      <code>{`{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}`}</code>
+                      <button
+                        onClick={() => handleCopy('{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}', 'mcp-test-json')}
+                        className="text-zinc-400 hover:text-white transition-colors shrink-0 ml-2"
+                      >
+                        {copiedCode === 'mcp-test-json' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-zinc-400 font-sans pt-1">
+                    The binary will respond with a complete JSON list of the 4 supported tools and their parameter schemas.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 5: FRAMEWORK EXAMPLES */}
           {activeSection === 'frameworks' && (
             <div className="space-y-6">
               <div>

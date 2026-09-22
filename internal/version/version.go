@@ -10,7 +10,7 @@ import (
 
 var (
 	// Version is the current version string. Injected at build time via -ldflags.
-	Version = "v0.1.0"
+	Version = "v0.2.0"
 
 	// Commit is the Git commit short SHA. Injected at build time via -ldflags.
 	Commit = "dev"
